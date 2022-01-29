@@ -1,0 +1,410 @@
+{
+	"info": {
+		"_postman_id": "1a62a80a-9628-470a-b9e4-5dbdc8c2230d",
+		"name": "API - Lecture2",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get All Users",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code should be 200\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"})\r",
+							"\r",
+							"let response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Check if the pagination total exist\", () => {\r",
+							"    pm.expect(response.meta.pagination.total).to.exist;\r",
+							"    pm.expect(response.meta.pagination.total).to.not.equal(\"\");\r",
+							"})\r",
+							"pm.test(\"Check pagination pages is not null.\", () => {\r",
+							"    pm.expect(response.meta.pagination.pages).to.not.null;\r",
+							"})\r",
+							"pm.test(\"Check if the pagination current page is 1.\", () => {\r",
+							"    pm.expect(response.meta.pagination.page).to.equal(1);\r",
+							"})\r",
+							"pm.test(\"Check if the pagination limit is 20 per page.\", () => {\r",
+							"    pm.expect(response.meta.pagination.limit).to.equal(20);\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let gorestToken = \"5b3a7e195ad63b23f3600f21a897f7ae18f6f199dee445905706d1d8ed21d280\";",
+							"pm.environment.set(\"gorestToken\", gorestToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/public/v1/users/",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"public",
+						"v1",
+						"users",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create A  New User",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let randomEmail = pm.variables.replaceIn('{{$randomEmail}}');",
+							"pm.environment.set('randomEmail', randomEmail);",
+							"console.log(randomEmail);",
+							"",
+							"let randomFullName = pm.variables.replaceIn(\"{{$randomFullName}}\");",
+							"pm.environment.set(\"randomFullName\", randomFullName);",
+							"console.log(randomFullName);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Compare Name | Status should be 201\", function(){\r",
+							"   pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"var response = pm.response.json();\r",
+							"\r",
+							"pm.environment.set(\"dataId\", response.data.id); \r",
+							"\r",
+							"pm.test(\"Test Name Has Been Updated\", () => {\r",
+							"    pm.expect(response.data.name).to.equal(pm.environment.get('randomFullName'));\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Verify If Email Address Is Updated\", () => {\r",
+							"    pm.expect(response.data.email).to.equal(pm.environment.get('randomEmail'));\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"{{randomFullName}}\",\r\n    \"email\": \"{{randomEmail}}\",\r\n    \"gender\": \"male\",\r\n    \"status\": \"active\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/public/v1/users/",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"public",
+						"v1",
+						"users",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verify A New User Is Created",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Verify user is created: Status code should be 200\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"})\r",
+							"\r",
+							"pm.test('Verify Full Name and Email Have Been Updated', () => {\r",
+							"    let response = pm.response.json();\r",
+							"    pm.expect(response.data.name).to.equal(pm.environment.get('randomFullName'));\r",
+							"    pm.expect(response.data.email).to.equal(pm.environment.get('randomEmail'));\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/public/v1/users/{{dataId}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"public",
+						"v1",
+						"users",
+						"{{dataId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update  User Data",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let randomEmail = pm.variables.replaceIn('{{$randomEmail}}');",
+							"pm.environment.set('randomEmail', randomEmail);",
+							"console.log(randomEmail);",
+							"",
+							"let randomFullName = pm.variables.replaceIn(\"{{$randomFullName}}\");",
+							"pm.environment.set(\"randomFullName\", randomFullName);",
+							"console.log(randomFullName);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Update user data is updated: Status code should be 200\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"})\r",
+							"\r",
+							"pm.test('Check If Email Has Been Updated', () => {\r",
+							"    let response = pm.response.json();\r",
+							"    pm.expect(response.data.email).to.equal(pm.environment.get(\"randomEmail\"));\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"{{randomFullName}}\",\r\n    \"email\": \"{{randomEmail}}\",\r\n    \"gender\": \"male\",\r\n    \"status\": \"active\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/public/v1/users/{{dataId}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"public",
+						"v1",
+						"users",
+						"{{dataId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verify User Is Deleted",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Verify User is deleted: Status code should be 200\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/public/v1/users/{{dataId}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"public",
+						"v1",
+						"users",
+						"{{dataId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete A User Data",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Delete a user: This is deleting the entry, status code should be 204\", () => {\r",
+							"    pm.response.to.have.status(204);\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/public/v1/users/{{dataId}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"public",
+						"v1",
+						"users",
+						"{{dataId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get User Info",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code should be 404\", () => {\r",
+							"    pm.response.to.have.status(404);\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/public/v1/users/{{dataId}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"public",
+						"v1",
+						"users",
+						"{{dataId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "tokenType",
+				"value": "",
+				"type": "string"
+			},
+			{
+				"key": "accessToken",
+				"value": "{{gorest-token}}",
+				"type": "string"
+			},
+			{
+				"key": "tokenName",
+				"value": "gorest token",
+				"type": "string"
+			},
+			{
+				"key": "challengeAlgorithm",
+				"value": "S256",
+				"type": "string"
+			},
+			{
+				"key": "grant_type",
+				"value": "authorization_code",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			},
+			{
+				"key": "client_authentication",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "gorest-token",
+			"value": "5b3a7e195ad63b23f3600f21a897f7ae18f6f199dee445905706d1d8ed21d280"
+		}
+	]
+}
